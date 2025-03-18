@@ -77,25 +77,34 @@ for ($i = $count; $i -lt $lines.Length; $i++) {
     }
     # Process line
     $rest = $lines[$i]
-    $start = 0
     $end = $rest.IndexOf('[')
     if ($end -lt 1) {
         Write-Host "Syntax error in line $($i + 1): $($lines[$i])" -ForegroundColor Red
         exit
     }
-    $target += $rest.Substring($start, $end)
-    $rest = $rest.Remove($start, $end)
+    $target += $rest.Substring(0, $end)
+    $rest = $rest.Remove(0, $end+1)
 
-    $start = $end + 1
     $end = $rest.IndexOf(']')
-    if ($end -lt 1) {
+    if ($end -lt 0) {
+        Write-Host "Syntax error in line $($i + 1): $($lines[$i])" -ForegroundColor Red
+        exit
+    } elseif ($end -eq 0) {
+          $dependencies += $null
+    } else {
+        $dependencies += $rest.Substring(0, $end).Split(",")
+    }
+    $rest = $rest.Remove(0, $end+1)
+
+    $end = $rest.IndexOf(':')
+    if ($end -ne 0) {
         Write-Host "Syntax error in line $($i + 1): $($lines[$i])" -ForegroundColor Red
         exit
     }
-    if ($end -ge $rest.Length) {
-        continue
-    }
-    $ds = $rest.Substring($start, $end)
-    Write-Host "$ds"
-    $rest = $rest.Remove($start, $end)
+    $rest = $rest.Remove(0, $end+1)
+    $command += $rest
 }
+
+Write-Host $target.Length
+Write-Host $dependencies.Length
+Write-Host $command.Length
