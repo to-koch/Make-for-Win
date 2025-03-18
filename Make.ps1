@@ -21,7 +21,7 @@ if(-not (Test-Path -LiteralPath $path)) {
 $macros = @{} # maps every macro to its content
 $phony = @() # list of all phony targets
 $target = @() # list of all targets
-$dependencies = @() # list of lists of all dependencies
+$dependencies = New-Object System.Collections.ArrayList # list of lists of all dependencies
 $command = @() # list of all commands
 
 $lines = Get-Content -LiteralPath $path -Force
@@ -90,9 +90,9 @@ for ($i = $count; $i -lt $lines.Length; $i++) {
         Write-Host "Syntax error in line $($i + 1): $($lines[$i])" -ForegroundColor Red
         exit
     } elseif ($end -eq 0) {
-          $dependencies += $null
+        $dependencies.Add($null)
     } else {
-        $dependencies += $rest.Substring(0, $end).Split(",")
+        $dependencies.Add($rest.Substring(0, $end).Split(","))
     }
     $rest = $rest.Remove(0, $end+1)
 
@@ -105,6 +105,5 @@ for ($i = $count; $i -lt $lines.Length; $i++) {
     $command += $rest
 }
 
-Write-Host $target.Length
-Write-Host $dependencies.Length
-Write-Host $command.Length
+
+Write-Host $dependencies[2]
